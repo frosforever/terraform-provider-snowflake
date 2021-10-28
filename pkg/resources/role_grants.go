@@ -98,9 +98,6 @@ func ReadRoleGrants(d *schema.ResourceData, meta interface{}) error {
 	db := meta.(*sql.DB)
 	roleName := d.Id()
 
-	tfRoles := expandStringList(d.Get("roles").(*schema.Set).List())
-	tfUsers := expandStringList(d.Get("users").(*schema.Set).List())
-
 	roles := make([]string, 0)
 	users := make([]string, 0)
 
@@ -112,17 +109,9 @@ func ReadRoleGrants(d *schema.ResourceData, meta interface{}) error {
 	for _, grant := range grants {
 		switch grant.GrantedTo.String {
 		case "ROLE":
-			for _, tfRole := range tfRoles {
-				if tfRole == grant.GranteeName.String {
-					roles = append(roles, grant.GranteeName.String)
-				}
-			}
+			roles = append(roles, grant.GranteeName.String)
 		case "USER":
-			for _, tfUser := range tfUsers {
-				if tfUser == grant.GranteeName.String {
-					users = append(users, grant.GranteeName.String)
-				}
-			}
+			users = append(users, grant.GranteeName.String)
 		default:
 			return fmt.Errorf("unknown grant type %s", grant.GrantedTo.String)
 		}
